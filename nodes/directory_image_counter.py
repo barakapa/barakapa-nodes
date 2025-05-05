@@ -14,7 +14,7 @@ class DirectoryImageCounterNode:
         self.output_dir: str = get_output_directory()
     
     @classmethod
-    def INPUT_TYPES(s) -> InputDict:
+    def INPUT_TYPES(cls) -> InputDict:
         return {
             'required': {
                 'directory_name': ('STRING', {'default': ''}),
@@ -30,7 +30,7 @@ class DirectoryImageCounterNode:
  
     FUNCTION: str = 'count_dir_images'
  
-    #OUTPUT_NODE = False
+    # OUTPUT_NODE: bool = False
  
     CATEGORY: str = 'custom/Directory Image Counter'
 
