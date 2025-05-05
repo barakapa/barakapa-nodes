@@ -1,4 +1,4 @@
-from .directory_image_counter import DirectoryImageCounterNode
+from .nodes.directory_image_counter import DirectoryImageCounterNode
 
 # A dictionary that contains all nodes you want to export with their names.
 # NOTE: Names should be globally unique.
