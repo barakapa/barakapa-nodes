@@ -41,7 +41,7 @@ class JsonOpt:
     def is_none(self) -> bool:
         return self.json is None
 
-def search_and_replace(text: str, prompt: Optional[str], extra_pnginfo: Optional[str]) -> str:
+def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: Optional[str | Json]) -> str:
     '''Replaces date and other S&R tags in a string with the correct values.'''
 
     if extra_pnginfo is None or prompt is None:
@@ -92,11 +92,15 @@ def search_and_replace(text: str, prompt: Optional[str], extra_pnginfo: Optional
     extra_pnginfo_json: Optional[Json] = None
     if isinstance(extra_pnginfo, str):
         extra_pnginfo_json = loads(extra_pnginfo)
+    elif extra_pnginfo:
+        extra_pnginfo_json = extra_pnginfo
     extra_pnginfo_jsonopt: JsonOpt = JsonOpt(extra_pnginfo_json)
 
     prompt_json: Optional[Json] = None
     if isinstance(prompt, str):
         prompt_json = loads(prompt)
+    elif prompt:
+        prompt_json = prompt
     prompt_jsonopt: JsonOpt = JsonOpt(prompt_json)
 
     nodes: list[JsonOpt] = extra_pnginfo_jsonopt.get('workflow').get('nodes').to_list()
