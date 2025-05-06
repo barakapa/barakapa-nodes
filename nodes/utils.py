@@ -149,12 +149,12 @@ def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: O
                 continue
 
         # Find the value of the specified widget in prompt JSON
-        prompt_node: JsonOpt = prompt_jsonopt.get(node_id_str)
-        if prompt_node.is_none():
-            print(f"No prompt data for node with id {node_id_str}.")
+        node_from_id: JsonOpt = prompt_jsonopt.get(node_id_str)
+        if node_from_id.is_none():
+            print(f"No node with id {node_id_str} found.")
             continue
 
-        widget_value: JsonOpt = prompt_node.get('inputs').get(widget_name)
+        widget_value: JsonOpt = node_from_id.get('inputs').get(widget_name)
         if widget_value.is_none():
             print(f"No widget with name {widget_name} found for node {node_name}.")
             continue
