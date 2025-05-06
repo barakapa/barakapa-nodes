@@ -35,7 +35,7 @@ class DirectoryImageCounterNode:
     CATEGORY: str = 'custom/Directory Image Counter'
 
     @classmethod
-    def IS_CHANGED(self, _) -> float:
+    def IS_CHANGED(self, **_) -> float:
         '''The node will always be re executed if any of the inputs change but
         this method can be used to force the node to execute again even when the inputs don't change.
         You can make this node return a number or a string. This value will be compared to the one
