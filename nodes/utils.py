@@ -128,7 +128,7 @@ def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: O
             return text
 
     # Find all patterns in the text that need to be replaced
-    patterns: list[str] = findall(r"%([^%]+)%", text)
+    patterns: list[str] = findall(r'%([^%]+)%', text)
     pattern: str
     for pattern in patterns:
         # Split the pattern to get the node name and widget name
@@ -141,7 +141,7 @@ def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: O
         if node_name_key in node_to_id_map:
             node_id_str = node_to_id_map[node_name_key]
         else:
-            print(f"No node with name {node_name_key} found.")
+            print(f'No node with name {node_name_key} found.')
             # check if user entered id instead of node name
             if node_name_key in node_to_id_map.values():
                 node_id_str = node_name_key
@@ -151,16 +151,16 @@ def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: O
         # Find the value of the specified widget in prompt JSON
         node_from_id: JsonOpt = prompt_jsonopt.get(node_id_str)
         if node_from_id.is_none():
-            print(f"No node with id {node_id_str} found.")
+            print(f'No node with id {node_id_str} found.')
             continue
 
         widget_value: JsonOpt = node_from_id.get('inputs').get(widget_name)
         if widget_value.is_none():
-            print(f"No widget with name {widget_name} found for node {node_name}.")
+            print(f'No widget with name {widget_name} found for node {node_name}.')
             continue
 
         # Replace the pattern in the text
-        text = text.replace(f"%{pattern}%", str(widget_value))
+        text = text.replace(f'%{pattern}%', str(widget_value))
 
     return text
 

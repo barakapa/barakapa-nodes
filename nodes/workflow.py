@@ -1,4 +1,4 @@
-'''Helper functions related to ComfyUI workflows, also often called "prompts' in the code. Each workflow
+'''Helper functions related to ComfyUI workflows, also often called "prompts" in the code. Each workflow
 is represented by a JSON-like object, produced from litegraph.js and imported into Python as a dict.
 '''
 
