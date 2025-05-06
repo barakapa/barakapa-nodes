@@ -191,4 +191,4 @@ def compare_json(obj1: Json, obj2: Json) -> int:
     '''
     obj1_str: str = stringify(obj1)
     obj2_str: str = stringify(obj2)
-    return (obj1_str > obj2_str) - (obj2_str < obj1_str)
+    return (obj1_str > obj2_str) - (obj1_str < obj2_str)
