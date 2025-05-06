@@ -5,12 +5,13 @@ from folder_paths import get_output_directory
 
 from .utils import InputDict, Json, search_and_replace
 
+# File extensions that represent a file to be picked up by the counter.
 IMAGE_EXTS: set[str] = {
     '.png',
 }
 
 class DirectoryImageCounterNode:
-    def __init__(self):
+    def __init__(self) -> None:
         self.output_dir: str = get_output_directory()
     
     @classmethod
@@ -29,9 +30,7 @@ class DirectoryImageCounterNode:
     RETURN_NAMES: tuple[str, ...] = ('int', 'string')
 
     FUNCTION: str = 'count_dir_images'
-
     # OUTPUT_NODE: bool = False
-
     CATEGORY: str = 'custom/Directory Image Counter'
 
     @classmethod

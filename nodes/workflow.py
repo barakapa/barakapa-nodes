@@ -2,7 +2,7 @@
 is represented by a JSON-like object, produced from litegraph.js and imported into Python as a dict.
 '''
 
-from .utils import Json, canonicalize_json, stringify
+from .utils import Json, canonicalize_json, compare_json, stringify
 
 # Length of a list that represents a reference to another node in a node's inputs.
 INPUT_REFERENCE_LENGTH: int = 2
@@ -13,6 +13,7 @@ INPUTS_KEY: str = 'inputs'
 # Keys of a node that should be stripped by strip_metadata().
 METADATA_KEYS: set[str] = {
     '_meta',
+    'is_changed',
 }
 
 def strip_metadata(workflow: dict[str, Json]) -> dict[str, Json]:
@@ -29,15 +30,18 @@ def strip_metadata(workflow: dict[str, Json]) -> dict[str, Json]:
             new_workflow[key] = value
     return new_workflow
 
-def remap_node_ids(workflow: dict[str, Json], id_mapping: dict[str, str]) -> dict[str, Json]:
-    '''Given a new mapping of original node IDs to new node ID values, remap
-    all the nodes in the workflow to use the new node IDs instead.
+def remap_node_ids(workflow: dict[str, Json]) -> list[Json]:
+    '''Given a sorted workflow, remap all the input references in the workflow to use the index
+    of the node in the values list as node IDs instead. Returns the list of remapped nodes.
     '''
-    remapped_workflow: dict[str, Json] = {}
+    # Generate ID mapping from original to sorted
+    id_mapping: dict[str, int] = {k: index for index, k in enumerate(workflow.keys())}
+
+    remapped_workflow: dict[int, Json] = {}
     node_id: str
     node: Json
     for node_id, node in workflow.items():
-        new_id: str = id_mapping[node_id]
+        new_id: int = id_mapping[node_id]
         if isinstance(node, dict):
             new_node: dict[str, Json] = node.copy()
             inputs: Json = node[INPUTS_KEY]
@@ -57,7 +61,7 @@ def remap_node_ids(workflow: dict[str, Json], id_mapping: dict[str, str]) -> dic
                 raise ValueError('Workflow inputs should be a dict.')
         else:
             remapped_workflow[new_id] = node
-    return remapped_workflow
+    return list(remapped_workflow.values())
 
 def sort_workflow(workflow: Json) -> Json:
     '''Given a workflow, sorts the nodes and fixes links to create an unique representation
@@ -77,9 +81,12 @@ def sort_workflow(workflow: Json) -> Json:
 
     # Sort nodes, ignoring node ID and edges (sort dict by value)
     sorted_nodes: dict[str, Json] = dict(sorted(canonical_nodes.items(), key=lambda pair: stringify(pair[1])))
+    return sorted_nodes
 
-    # Generate ID mapping from original to sorted
-    id_mapping: dict[str, str] = {k: str(index) for index, k in enumerate(sorted_nodes.keys())}
-
-    # Fix edges of nodes
-    return remap_node_ids(sorted_nodes, id_mapping)
+def are_sorted_workflows_equal(workflow1: Json, workflow2: Json) -> bool:
+    '''Compares two sorted workflows, ignoring their node ID values.'''
+    if not isinstance(workflow1, dict) or not isinstance(workflow2, dict):
+        return workflow1 == workflow2
+    remapped1: list[Json] = remap_node_ids(workflow1)
+    remapped2: list[Json] = remap_node_ids(workflow2)
+    return compare_json(remapped1, remapped2) == 0

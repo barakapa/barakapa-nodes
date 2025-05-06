@@ -11,8 +11,14 @@ from typing_extensions import Self
 # This value is used for comparing between two floating-point numbers.
 FLOAT_COMPARISON_EPSILON: float = 1e-9
 
+# String value to be shown in the UI for the boolean value True.
+TRUE_VALUE: str = 'true'
+
+# String value to be shown in the UI for the boolean value False.
+FALSE_VALUE: str = 'false'
+
 Json: TypeAlias = dict[str, 'Json'] | list['Json'] | str | int | float | bool
-InputDict: TypeAlias = dict[str, dict[str, str | tuple[str, dict[str, str]]]]
+InputDict: TypeAlias = dict[str, dict[str, str | tuple[str | list[str], dict[str, str | int | bool | float]]]]
 
 class JsonOpt:
     '''Represents an optional JSON object. Allows for .get method chaining.'''
@@ -192,3 +198,12 @@ def compare_json(obj1: Json, obj2: Json) -> int:
     obj1_str: str = stringify(obj1)
     obj2_str: str = stringify(obj2)
     return (obj1_str > obj2_str) - (obj1_str < obj2_str)
+
+def parse_bool_str(string: str) -> bool:
+    '''Parses a string used to represent a Boolean value, returning an actual Boolean.'''
+    if string == TRUE_VALUE:
+        return True
+    elif string == FALSE_VALUE:
+        return False
+    else:
+        raise ValueError(f'Unrecognized boolean string "{string}"!')
