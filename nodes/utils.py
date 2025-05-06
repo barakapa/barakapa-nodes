@@ -1,11 +1,15 @@
 '''Helper classes, functions, and declarations for custom nodes.'''
 
 from datetime import datetime
-from json import loads
+from json import dumps, loads
+from math import isclose
 from re import Match, findall, finditer
 from typing import Optional, TypeAlias
 
 from typing_extensions import Self
+
+# This value is used for comparing between two floating-point numbers.
+FLOAT_COMPARISON_EPSILON: float = 1e-9
 
 Json: TypeAlias = dict[str, 'Json'] | list['Json'] | str | int | float | bool
 InputDict: TypeAlias = dict[str, dict[str, str | tuple[str, dict[str, str]]]]
@@ -153,3 +157,38 @@ def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: O
         text = text.replace(f"%{pattern}%", str(widget_value))
 
     return text
+
+def normalize_float(x: float, epsilon: float = FLOAT_COMPARISON_EPSILON) -> float:
+    '''Converts a float to a rounded value for comparison, based on an epsilon.'''
+    precision: int
+    for precision in range(16): # IEEE-754 has ~15-17 significant digits
+        rounded: float = round(x, precision)
+        if isclose(x, rounded, abs_tol=epsilon):
+            return rounded
+    return x
+
+def canonicalize_json(obj: Json) -> Json:
+    '''Converts a JSON object to a canonical form, taking into account nested objects and float comparison.'''
+    if isinstance(obj, float):
+        return normalize_float(obj)
+    elif isinstance(obj, dict):
+        # Sort keys and canonicalize values
+        return dict(sorted((k, canonicalize_json(v)) for k, v in obj.items()))
+    elif isinstance(obj, list):
+        return [canonicalize_json(item) for item in obj]
+    else:
+        return obj
+    
+def stringify(obj: Json) -> str:
+    '''Helper function to convert a JSON object into a compact string.'''
+    # Reduce whitespace in serialized JSON
+    separator_symbols: tuple[str, str] = (',', ':')
+    return dumps(obj, separators=separator_symbols)
+
+def compare_json(obj1: Json, obj2: Json) -> int:
+    '''Compares two JSON objects for equality. Returns 0 if both objects are equivalent.
+    Otherwise, returns -1 if obj1 < obj2, or returns 1 if obj2 > obj1.
+    '''
+    obj1_str: str = stringify(obj1)
+    obj2_str: str = stringify(obj2)
+    return (obj1_str > obj2_str) - (obj2_str < obj1_str)
