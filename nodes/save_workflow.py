@@ -1,15 +1,18 @@
 from io import TextIOWrapper
 from json import dump, load, loads
-from os import listdir, path
+from os import listdir, makedirs, path
 from typing import Any, Optional
 
 from folder_paths import get_output_directory
 
-from .utils import FALSE_VALUE, TRUE_VALUE, InputDict, Json, parse_bool_str, search_and_replace
+from .utils import FALSE_VALUE, JSON_SEPARATORS, TRUE_VALUE, InputDict, Json, parse_bool_str, search_and_replace
 from .workflow import are_sorted_workflows_equal, sort_workflow
 
 # The extension to use when saving a new workflow.
 SAVE_EXT: str = '.json'
+
+# This key should match the value given in "js/saveWorkflow.js".
+OUTPUT_TEXT_KEY: str = 'dispText'
 
 # Files with these extensions will be checked for duplicate workflows.
 WORKFLOW_EXTS: set[str] = {
@@ -33,7 +36,7 @@ class SaveWorkflowNode:
         return {
             'required': {
                 'directory_name': ('STRING', {'default': ''}),
-                'file_name': ('STRING', {'default': 'workflow'}),
+                'file_name': ('STRING', {'default': 'workflow_'}),
                 'is_appending_counter': ([TRUE_VALUE, FALSE_VALUE], {'default': TRUE_VALUE}),
             },
             'hidden': {
@@ -68,7 +71,7 @@ class SaveWorkflowNode:
         is_appending_counter: str,
         prompt: Optional[str | Json] = None,
         extra_pnginfo: Optional[str | Json] = None
-    ) -> dict[str, dict[str, Any] | tuple[int, str]]:
+    ) -> dict[str, dict[str, list[Any]] | tuple[int, str]]:
         '''Main method of SaveWorkflowNode.'''
 
         is_appending_counter_bool: bool = parse_bool_str(is_appending_counter)
@@ -79,6 +82,7 @@ class SaveWorkflowNode:
 
         counter: int
         try:
+            makedirs(full_output_folder, exist_ok=True)
             dir_children: list[str] = listdir(full_output_folder)
             existing_workflows: list[str] = [d for d in dir_children if path.splitext(d)[1] in WORKFLOW_EXTS]
             counter = len(existing_workflows)
@@ -104,7 +108,7 @@ class SaveWorkflowNode:
                         workflow: Json = load(workflow_file)
                     if are_sorted_workflows_equal(current_workflow, workflow):
                         already_exists_msg: str = get_already_exists_msg(full_file_path)
-                        return {'ui': {'text': already_exists_msg}, 'result': (counter, f'{counter:05d}')}
+                        return {'ui': {OUTPUT_TEXT_KEY: [already_exists_msg]}, 'result': (counter, str(counter))}
 
                 # Current workflow is unique, we save it to disk
                 new_workflow_file_name: str = ''
@@ -115,8 +119,7 @@ class SaveWorkflowNode:
                 new_workflow_file_path: str = path.join(full_output_folder, new_workflow_file_name)
                 new_workflow_file: TextIOWrapper
                 with open(new_workflow_file_path, 'w') as new_workflow_file:
-                    dump(current_workflow, new_workflow_file)
-                counter += 1
+                    dump(current_workflow, new_workflow_file, separators=JSON_SEPARATORS)
                 ui_message = get_file_saved_msg(new_workflow_file_path)
 
-        return {'ui': {'text': ui_message}, 'result': (counter, f'{counter:05d}')}
+        return {'ui': {OUTPUT_TEXT_KEY: [ui_message]}, 'result': (counter, str(counter))}

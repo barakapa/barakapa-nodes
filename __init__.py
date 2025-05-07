@@ -17,4 +17,7 @@ NODE_DISPLAY_NAME_MAPPINGS: dict[str, str] = {
     'brkp_SaveWorkflow': 'Save Workflow (Custom)',
 }
 
-__all__: list[str] = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
+# Ensure that custom JavaScript for nodes is loaded.
+WEB_DIRECTORY = './js'
+
+__all__: list[str] = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', 'WEB_DIRECTORY']

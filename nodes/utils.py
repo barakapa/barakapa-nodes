@@ -17,6 +17,9 @@ TRUE_VALUE: str = 'true'
 # String value to be shown in the UI for the boolean value False.
 FALSE_VALUE: str = 'false'
 
+# A pair of separator symbols that reduce whitespaces in serialized JSON.
+JSON_SEPARATORS: tuple[str, str] = (',', ':')
+
 Json: TypeAlias = dict[str, 'Json'] | list['Json'] | str | int | float | bool
 InputDict: TypeAlias = dict[str, dict[str, str | tuple[str | list[str], dict[str, str | int | bool | float]]]]
 
@@ -27,7 +30,7 @@ class JsonOpt:
         self.json: Optional[Json] = json
 
     def get(self, key: str) -> Self:
-        if isinstance(self.json, dict):
+        if isinstance(self.json, dict) and key in self.json:
             return self.__class__(self.json[key])
         else:
             return self.__class__()
@@ -187,9 +190,7 @@ def canonicalize_json(obj: Json) -> Json:
     
 def stringify(obj: Json) -> str:
     '''Helper function to convert a JSON object into a compact string.'''
-    # Reduce whitespace in serialized JSON
-    separator_symbols: tuple[str, str] = (',', ':')
-    return dumps(obj, separators=separator_symbols)
+    return dumps(obj, separators=JSON_SEPARATORS)
 
 def compare_json(obj1: Json, obj2: Json) -> int:
     '''Compares two JSON objects for equality. Returns 0 if both objects are equivalent.
