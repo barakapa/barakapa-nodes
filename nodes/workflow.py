@@ -35,7 +35,12 @@ def strip_metadata(workflow: dict[str, Json]) -> dict[str, Json]:
             continue
 
         new_node: dict[str, Json] = {k: v for k, v in node_obj.items() if k not in METADATA_KEYS and k != INPUTS_KEY}
-        new_node[INPUTS_KEY] = {k: v for k, v in node_obj[INPUTS_KEY].items() if k not in IGNORED_INPUTS_KEYS}
+        inputs: Json = node_obj[INPUTS_KEY]
+
+        if not isinstance(inputs, dict):
+            raise ValueError('Workflow inputs should be a dict.')
+
+        new_node[INPUTS_KEY] = {k: v for k, v in inputs.items() if k not in IGNORED_INPUTS_KEYS}
         new_workflow[node_id] = new_node
 
     return new_workflow
