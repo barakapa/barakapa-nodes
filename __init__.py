@@ -1,6 +1,6 @@
-from .nodes.count_tokens import CountTokensNode
-from .nodes.directory_image_counter import DirectoryImageCounterNode
-from .nodes.save_workflow import SaveWorkflowNode
+from .custom_nodes.count_tokens import CountTokensNode
+from .custom_nodes.directory_image_counter import DirectoryImageCounterNode
+from .custom_nodes.save_workflow import SaveWorkflowNode
 
 # A dictionary that contains all nodes you want to export with their names.
 # NOTE: Names should be globally unique.
