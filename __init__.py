@@ -1,5 +1,6 @@
 from .custom_nodes.count_tokens import CountTokensNode
 from .custom_nodes.directory_image_counter import DirectoryImageCounterNode
+from .custom_nodes.prompt_box import PromptBoxNode
 from .custom_nodes.save_workflow import SaveWorkflowNode
 
 # A dictionary that contains all nodes you want to export with their names.
@@ -7,6 +8,7 @@ from .custom_nodes.save_workflow import SaveWorkflowNode
 NODE_CLASS_MAPPINGS: dict[str, type] = {
     'brkp_CountTokens': CountTokensNode,
     'brkp_DirectoryImageCounter': DirectoryImageCounterNode,
+    'brkp_PromptBox': PromptBoxNode,
     'brkp_SaveWorkflow': SaveWorkflowNode,
 }
  
@@ -14,6 +16,7 @@ NODE_CLASS_MAPPINGS: dict[str, type] = {
 NODE_DISPLAY_NAME_MAPPINGS: dict[str, str] = {
     'brkp_CountTokens': 'Prompt Tokens Counter (Custom)',
     'brkp_DirectoryImageCounter': 'Directory Image Counter (Custom)',
+    'brkp_PromptBox': 'Prompt Box (Custom)',
     'brkp_SaveWorkflow': 'Save Workflow (Custom)',
 }
 
