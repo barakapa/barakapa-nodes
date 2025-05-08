@@ -35,7 +35,10 @@ class SaveWorkflowNode:
     def INPUT_TYPES(cls) -> InputDict:
         return {
             'required': {
-                'directory_name': ('STRING', {'default': ''}),
+                'directory_name': ('STRING', {
+                    'default': '',
+                    'tooltip': 'Subdirectory of the output directory to save workflows to.'
+                }),
                 'file_name': ('STRING', {'default': 'workflow_'}),
                 'is_appending_counter': ([TRUE_VALUE, FALSE_VALUE], {'default': TRUE_VALUE}),
             },
