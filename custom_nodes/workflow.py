@@ -45,9 +45,10 @@ def strip_metadata(workflow: dict[str, Json]) -> dict[str, Json]:
 
     return new_workflow
 
-def remap_node_ids(workflow: dict[str, Json]) -> list[Json]:
+def remap_node_ids(workflow: dict[str, Json]) -> tuple[list[Json], dict[str, int]]:
     '''Given a sorted workflow, remap all the input references in the workflow to use the index
-    of the node in the values list as node IDs instead. Returns the list of remapped nodes.
+    of the node in the values list as node IDs instead. Returns the list of remapped nodes and a
+    dict representing the mapping from original node IDs to the new index of the node in the list.
     '''
     # Generate ID mapping from original to sorted
     id_mapping: dict[str, int] = {k: index for index, k in enumerate(workflow.keys())}
@@ -80,7 +81,7 @@ def remap_node_ids(workflow: dict[str, Json]) -> list[Json]:
         new_node[INPUTS_KEY] = remapped_inputs
         remapped_workflow[new_id] = new_node
 
-    return list(remapped_workflow.values())
+    return list(remapped_workflow.values()), id_mapping
 
 def sort_workflow(workflow: Json) -> Json:
     '''Given a workflow, sorts the nodes and fixes links to create an unique representation
@@ -102,10 +103,33 @@ def sort_workflow(workflow: Json) -> Json:
     sorted_nodes: dict[str, Json] = dict(sorted(canonical_nodes.items(), key=lambda pair: stringify(pair[1])))
     return sorted_nodes
 
-def are_sorted_workflows_equal(workflow1: Json, workflow2: Json) -> bool:
-    '''Compares two sorted workflows, ignoring their node ID values.'''
-    if not isinstance(workflow1, dict) or not isinstance(workflow2, dict):
-        return workflow1 == workflow2
-    remapped1: list[Json] = remap_node_ids(workflow1)
-    remapped2: list[Json] = remap_node_ids(workflow2)
-    return compare_json(remapped1, remapped2) == 0
+def are_sorted_workflows_equal(workflow: Json, other_workflow: Json, ignored_nodes: list[str]) -> bool:
+    '''Compares two sorted workflows, ignoring their node ID values.
+    If "ignored_nodes" is given, which is a list of node IDs of "workflow",
+    comparison will ignore all input parameters of these specified nodes.
+    '''
+    if not isinstance(workflow, dict) or not isinstance(other_workflow, dict):
+        raise ValueError('Incorrect JSON objects passed to are_sorted_workflows_equal()!')
+
+    # Remap main workflow
+    remapped: list[Json]
+    node_id_mappings: dict[str, int]
+    remapped, node_id_mappings = remap_node_ids(workflow)
+
+    # Remap ignored_inputs as well
+    remapped_ignored: list[int] = [node_id_mappings[node_id] for node_id in ignored_nodes]
+
+    # Remap the other workflow
+    remapped_other: list[Json]
+    remapped_other, _ = remap_node_ids(other_workflow)
+
+    # Remove input values of remapped_ignored nodes from both workflows
+    def clear_inputs(node: Json) -> None:
+        if isinstance(node, dict):
+            node[INPUTS_KEY] = {}
+    for node_idx in remapped_ignored:
+        clear_inputs(remapped[node_idx])
+        clear_inputs(remapped_other[node_idx])
+
+    # Compare the two remapped workflows
+    return compare_json(remapped, remapped_other) == 0
