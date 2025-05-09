@@ -10,15 +10,20 @@ REFERENCE_LENGTH: int = 2
 # Key of a node that contains the dict of input parameters.
 INPUTS_KEY: str = 'inputs'
 
+# Key of a node that contains the node's internal type.
+TYPE_KEY: str = 'class_type'
+
 # Keys of a node that should be stripped by strip_metadata().
 METADATA_KEYS: set[str] = {
     '_meta',
     'is_changed',
 }
 
-# Input parameters of a node that should be stripped by strip_metadata().
-IGNORED_INPUTS_KEYS: set[str] = {
-    '_displayed_text',  # Used by SaveWorkflowNode to output information to the UI.
+# Input parameters of a node type that should be stripped by strip_metadata().
+# These parameters are stored as a tuple of (node_class_type, param_name).
+IGNORED_INPUTS_KEYS: set[tuple[str, str]] = {
+    ('brkp_SaveWorkflow', '_displayed_text'),   # Used by SaveWorkflowNode to output information to the UI.
+    ('PreviewAny', 'preview'),                  # Used by PreviewAny to print information.
 }
 
 def strip_metadata(workflow: dict[str, Json]) -> dict[str, Json]:
@@ -40,7 +45,12 @@ def strip_metadata(workflow: dict[str, Json]) -> dict[str, Json]:
         if not isinstance(inputs, dict):
             raise ValueError('Workflow inputs should be a dict.')
 
-        new_node[INPUTS_KEY] = {k: v for k, v in inputs.items() if k not in IGNORED_INPUTS_KEYS}
+        node_class_type: Json = node_obj[TYPE_KEY]
+        if not isinstance(node_class_type, str):
+            raise ValueError("Node's class_type should be a str.")
+
+        new_node[INPUTS_KEY] = {param_name: val for param_name, val in inputs.items()
+                                if (node_class_type, param_name) not in IGNORED_INPUTS_KEYS}
         new_workflow[node_id] = new_node
 
     return new_workflow
