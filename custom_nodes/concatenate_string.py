@@ -8,6 +8,7 @@ class ConcatenateStringNode:
             'required': {
                 'str_1': ('STRING', {'default': ''}),
                 'str_2': ('STRING', {'default': ''}),
+                'str_3': ('STRING', {'default': ''}),
             },
         }
 
@@ -15,6 +16,6 @@ class ConcatenateStringNode:
     RETURN_NAMES: tuple[str, ...] = ('output_str',)
     FUNCTION: str = 'concatenate_string'
     CATEGORY: str = 'custom'
-    
-    def concatenate_string(self, str_1: str, str_2: str) -> tuple[str]:
-        return (str_1 + str_2,)
+
+    def concatenate_string(self, str_1: str, str_2: str, str_3: str) -> tuple[str]:
+        return (str_1 + str_2 + str_3,)
