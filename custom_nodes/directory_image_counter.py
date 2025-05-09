@@ -3,7 +3,7 @@ from typing import Optional
 
 from folder_paths import get_output_directory
 
-from .utils import InputDict, Json, search_and_replace
+from .utils import InputDict, Json, count_files_in_dir, search_and_replace
 
 # File extensions that represent a file to be picked up by the counter.
 IMAGE_EXTS: set[str] = {
@@ -51,11 +51,6 @@ class DirectoryImageCounterNode:
         dir_name: str = search_and_replace(directory_name, prompt, extra_pnginfo)
         full_output_folder: str = path.join(self.output_dir, dir_name)
 
-        counter: int
-        try:
-            dir_children: list[str] = listdir(full_output_folder)
-            counter = len([d for d in dir_children if path.splitext(d)[1] in IMAGE_EXTS])
-        except FileNotFoundError:
-            counter = 0
+        counter: int = count_files_in_dir(full_output_folder, IMAGE_EXTS)
         return counter, f'{counter:05d}'
  

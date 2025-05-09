@@ -5,7 +5,8 @@ from typing import Any, Optional
 
 from folder_paths import get_output_directory
 
-from .utils import FALSE_VALUE, JSON_SEPARATORS, TRUE_VALUE, InputDict, Json, parse_bool_str, search_and_replace
+from .utils import (FALSE_VALUE, JSON_SEPARATORS, TRUE_VALUE, InputDict, Json, find_files_with_ext_in_dir,
+                    parse_bool_str, search_and_replace)
 from .workflow import are_sorted_workflows_equal, sort_workflow
 
 # The extension to use when saving a new workflow.
@@ -15,40 +16,10 @@ SAVE_EXT: str = '.json'
 OUTPUT_TEXT_KEY: str = 'dispText'
 
 # A string that represents any valid ComfyUI type.
-ANY_TYPE: str = (
-    'STRING,'
-    'FLOAT,'
-    'INT,'
-    'BOOLEAN,'
-    'IMAGE,'
-    'CONDITIONING,'
-    'MODEL,'
-    'CLIP,'
-    'VAE,'
-    'CONTROL_NET,'
-    'MASK,'
-    'LATENT,'
-    'COMBO,'
-    'SAMPLER,'
-    'SIGMAS,'
-    'GUIDER,'
-    'NOISE,'
-    'CLIP_VISION,'
-    'CLIP_VISION_OUTPUT,'
-    'STYLE_MODEL,'
-    'GLIGEN,'
-    'UPSCALE_MODEL,'
-    'AUDIO,'
-    'WEBCAM,'
-    'POINT,'
-    'FACE_ANALYSIS,'
-    'BBOX,'
-    'SEGS,'
-    'VIDEO,'
-)
+ANY_TYPE: str = '*'
 
 # Tooltip for the directory_name input parameter.
-DIRECTORY_NAME_TOOLTIP: str = 'Subdirectory of the output directory to save workflows to.'
+DIRECTORY_NAME_TOOLTIP: str = 'Sub-directory of the output directory to save workflows to.'
 
 # Tooltip for the ignored_inputs input parameter.
 IGNORED_INPUTS_TOOLTIP: str = "Connect any workflow node here to ignore changes in that node's inputs."
@@ -106,7 +77,7 @@ class SaveWorkflowNode:
 
     FUNCTION: str = 'save_workflow'
     OUTPUT_NODE: bool = True
-    CATEGORY: str = 'custom/Save Workflow'
+    CATEGORY: str = 'custom/Save'
 
     @classmethod
     def IS_CHANGED(self, **_) -> float:
@@ -145,14 +116,9 @@ class SaveWorkflowNode:
             dir_name: str = search_and_replace(directory_name, prompt, extra_pnginfo)
             full_output_folder = path.join(self.output_dir, dir_name)
 
-        counter: int
-        try:
-            makedirs(full_output_folder, exist_ok=True)
-            dir_children: list[str] = listdir(full_output_folder)
-            existing_workflows: list[str] = [d for d in dir_children if path.splitext(d)[1] in WORKFLOW_EXTS]
-            counter = len(existing_workflows)
-        except FileNotFoundError:
-            counter = 0
+        existing_workflows: list[str] = find_files_with_ext_in_dir(full_output_folder, WORKFLOW_EXTS)
+        counter: int = len(existing_workflows)
+        makedirs(full_output_folder, exist_ok=True)
 
         ui_message: str = ''
         if prompt:

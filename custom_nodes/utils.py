@@ -3,6 +3,7 @@
 from datetime import datetime
 from json import dumps, loads
 from math import isclose
+from os import listdir, path
 from re import Match, findall, finditer
 from typing import Callable, Optional, TypeAlias, TypeVar
 
@@ -120,7 +121,7 @@ def map_unique_value_from_node(
 def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: Optional[str | Json]) -> str:
     '''Replaces date and other S&R tags in a string with the correct values.'''
 
-    if extra_pnginfo is None or prompt is None:
+    if not text or not extra_pnginfo or not prompt:
         return text
 
     # if %date: in text, then replace with date
@@ -256,6 +257,20 @@ def search_and_replace(text: str, prompt: Optional[str | Json], extra_pnginfo: O
         text = text.replace(f'%{pattern}%', replace_value)
 
     return text
+
+def find_files_with_ext_in_dir(dir_path: str, exts: set[str]) -> list[str]:
+    '''Gelper function to get a list of all files with certain extensions within a given dir_path.'''
+    try:
+        dir_children: list[str] = listdir(dir_path)
+    except FileNotFoundError:
+        return []
+    matched_files: list[str] = [d for d in dir_children if path.splitext(d)[1] in exts]
+    return matched_files
+
+def count_files_in_dir(dir_path: str, exts: set[str]) -> int:
+    '''Helper function to count files with certain extensions within a given dir_path.'''
+    matched_files: list[str] =  find_files_with_ext_in_dir(dir_path, exts)
+    return len(matched_files)
 
 def normalize_float(x: float, epsilon: float = FLOAT_COMPARISON_EPSILON) -> float:
     '''Converts a float to a rounded value for comparison, based on an epsilon.'''
