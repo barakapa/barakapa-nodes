@@ -129,7 +129,8 @@ def are_sorted_workflows_equal(workflow: Json, other_workflow: Json, ignored_nod
             node[INPUTS_KEY] = {}
     for node_idx in remapped_ignored:
         clear_inputs(remapped[node_idx])
-        clear_inputs(remapped_other[node_idx])
+        if node_idx < len(remapped_other):
+            clear_inputs(remapped_other[node_idx])
 
     # Compare the two remapped workflows
     return compare_json(remapped, remapped_other) == 0
