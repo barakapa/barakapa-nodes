@@ -272,6 +272,23 @@ def count_files_in_dir(dir_path: str, exts: set[str]) -> int:
     matched_files: list[str] =  find_files_with_ext_in_dir(dir_path, exts)
     return len(matched_files)
 
+def form_full_path(dir_path: str, file_name: str, file_ext: str) -> str:
+    '''Helper function to create a full file path.'''
+    file_name_with_ext: str = f'{file_name}{file_ext}'
+    file_path: str = path.join(dir_path, file_name_with_ext)
+    return file_path
+
+def find_unused_file_name(dir_path: str, orig_file_name: str, file_ext: str) -> str:
+    '''Helper function to find an unused file name in a given directory. Returns the full path ot the file.'''
+    file_name: str = orig_file_name
+    file_path: str = form_full_path(dir_path, file_name, file_ext)
+    save_attempts: int = 0
+    while path.exists(file_path):
+        save_attempts += 1
+        file_name = f'{orig_file_name}_{save_attempts}'
+        file_path = form_full_path(dir_path, file_name, file_ext)
+    return file_path
+
 def normalize_float(x: float, epsilon: float = FLOAT_COMPARISON_EPSILON) -> float:
     '''Converts a float to a rounded value for comparison, based on an epsilon.'''
     precision: int
