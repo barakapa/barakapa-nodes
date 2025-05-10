@@ -1,0 +1,15 @@
+# pyproject.toml
+[project]
+name = "barakapa-nodes"
+description = "Compare and save unique workflows, count tokens in prompt, and other utility."
+version = "1.0.0"
+license = { file = "LICENSE" }
+dependencies = [] # Filled in from requirements.txt
+
+[project.urls]
+Repository = "https://github.com/barakapa/barakapa-nodes"
+
+[tool.comfy]
+PublisherId = "barakapa"
+DisplayName = "barakapa-nodes"
+Icon = "" # SVG, PNG, JPG or GIF (MAX. 800x400px)
