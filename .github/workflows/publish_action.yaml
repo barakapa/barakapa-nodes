@@ -7,14 +7,18 @@ on:
     paths:
       - "pyproject.toml"
 
+permissions:
+  issues: write
+
 jobs:
   publish-node:
     name: Publish custom nodes to ComfyUI registry
     runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'barakapa' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Publish custom nodes
-        uses: Comfy-Org/publish-node-action@main
+        uses: Comfy-Org/publish-node-action@v1
         with:
           personal_access_token: ${{ secrets.COMFYUI_PUBLISHER_TOKEN }}
